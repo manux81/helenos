@@ -46,10 +46,31 @@
 
 /** Network interface options for SMC95XX card driver */
 static nic_iface_t smc95xx_nic_iface = {
+    .get_device_info = &smc95xx_get_device_info,
 };
 
 /** Basic device operations for SMC95XX driver */
 static ddf_dev_ops_t smc95xx_dev_ops;
+
+/** Get device information.
+ *
+ */
+static errno_t ar9271_get_device_info(ddf_fun_t *dev, nic_device_info_t *info)
+{
+    assert(dev);
+    assert(info);
+
+    memset(info, 0, sizeof(nic_device_info_t));
+
+    info->vendor_id = 0x0424;
+    info->device_id = 0x9904;
+    str_cpy(info->vendor_name, NIC_VENDOR_MAX_LENGTH,
+        "Microchip Technology, Inc.");
+    str_cpy(info->model_name, NIC_MODEL_MAX_LENGTH,
+        "LAN9512/LAN9514");
+
+    return EOK;
+}
 
 static errno_t smc95xx_dev_add(ddf_dev_t *dev);
 
