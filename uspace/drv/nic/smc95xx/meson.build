@@ -26,7 +26,7 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-deps = [ 'nic' ]
+deps = [ 'usbdev', 'usb', 'nic', 'crypto' ]
 src = files(
 	'driver.c',
 )
