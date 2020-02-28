@@ -29,4 +29,5 @@
 deps = [ 'usbdev', 'usb', 'nic', 'crypto' ]
 src = files(
 	'driver.c',
+	'eth_usb.c',
 )

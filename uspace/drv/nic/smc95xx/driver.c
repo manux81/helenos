@@ -47,6 +47,7 @@
 #include <str_error.h>
 
 #include "driver.h"
+#include "eth_usb.h"
 
 static errno_t smc95xx_get_device_info(ddf_fun_t *fun, nic_device_info_t *info);
 
