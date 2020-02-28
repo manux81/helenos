@@ -68,9 +68,8 @@ static errno_t smc95xx_get_device_info(ddf_fun_t *dev, nic_device_info_t *info)
 	assert(info);
 
 	memset(info, 0, sizeof(nic_device_info_t));
-
 	info->vendor_id = 0x0424;
-	info->device_id = 0x9904;
+	info->device_id = 0xec00;
 	str_cpy(info->vendor_name, NIC_VENDOR_MAX_LENGTH,
 	    "Microchip Technology, Inc.");
 	str_cpy(info->model_name, NIC_MODEL_MAX_LENGTH,
