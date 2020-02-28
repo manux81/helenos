@@ -38,11 +38,16 @@
 #include <device/hw_res.h>
 #include <io/log.h>
 #include <nic.h>
-#include <pci_dev_iface.h>
 #include <stdio.h>
 #include <str.h>
+#include <usb/classes/classes.h>
+#include <usb/dev/request.h>
+#include <usb/dev/poll.h>
+#include <usb/debug.h>
 
 #include "driver.h"
+
+static errno_t smc95xx_get_device_info(ddf_fun_t *fun, nic_device_info_t *info);
 
 /** Network interface options for SMC95XX card driver */
 static nic_iface_t smc95xx_nic_iface = {
@@ -55,7 +60,7 @@ static ddf_dev_ops_t smc95xx_dev_ops;
 /** Get device information.
  *
  */
-static errno_t ar9271_get_device_info(ddf_fun_t *dev, nic_device_info_t *info)
+static errno_t smc95xx_get_device_info(ddf_fun_t *dev, nic_device_info_t *info)
 {
     assert(dev);
     assert(info);
@@ -70,6 +75,21 @@ static errno_t ar9271_get_device_info(ddf_fun_t *dev, nic_device_info_t *info)
         "LAN9512/LAN9514");
 
     return EOK;
+}
+
+/** Create driver data structure.
+ * @param dev The device structure
+ *
+ * @return Initialized device data structure or NULL if error occured
+ */
+static smc95xx_t *smc95xx_create_dev_data(ddf_dev_t *dev)
+{
+    smc95xx_t *smc95xx = calloc(1, sizeof(smc95xx_t));
+    if (!smc95xx) {
+        return NULL;
+    }
+
+    return smc95xx;
 }
 
 static errno_t smc95xx_dev_add(ddf_dev_t *dev);
@@ -95,11 +115,17 @@ static driver_t smc95xx_driver = {
  */
 errno_t smc95xx_dev_add(ddf_dev_t *dev)
 {
-    if (dev == NULL) {
+    assert(dev);
+
+    smc95xx_t *smc95xx = smc95xx_create_dev_data(dev);
+    if (smc95xx == NULL) {
+        usb_log_error("Unable to allocate device softstate.\n");
         return ENOMEM;
     }
 
-	return EOK;
+    usb_log_info("HelenOS SMC95XX device initialized.\n");
+
+    return EOK;
 }
 
 /** Main function of SMC95XX driver
@@ -119,6 +145,7 @@ int main(void)
 	    &smc95xx_nic_iface);
 
 	ddf_log_init(NAME);
+
 	return ddf_driver_main(&smc95xx_driver);
 }
 
