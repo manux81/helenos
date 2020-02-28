@@ -44,6 +44,7 @@
 #include <usb/dev/request.h>
 #include <usb/dev/poll.h>
 #include <usb/debug.h>
+#include <str_error.h>
 
 #include "driver.h"
 
@@ -84,8 +85,22 @@ static errno_t smc95xx_get_device_info(ddf_fun_t *dev, nic_device_info_t *info)
  */
 static smc95xx_t *smc95xx_create_dev_data(ddf_dev_t *dev)
 {
+	errno_t rc = EOK;
+	const char *err_msg = NULL;
+
+	/* USB framework initialization. */
+	rc = usb_device_create_ddf(dev, endpoints, &err_msg);
+	if (rc != EOK) {
+		usb_log_error("Failed to create USB device: %s, "
+		    "ERR_NUM = %s\n", err_msg, str_error_name(rc));
+		return NULL;
+	}
+
+	/* SMC95XX structure initialization. */
 	smc95xx_t *smc95xx = calloc(1, sizeof(smc95xx_t));
 	if (!smc95xx) {
+		usb_log_error("Failed to initialize SMC95XX structure: %s\n",
+		    str_error_name(rc));
 		return NULL;
 	}
 
