@@ -39,7 +39,7 @@
 
 /* Endpoint 0: Control */
 static const usb_endpoint_description_t usb_smc95xx_in_ctr_endpoint_description = {
-	.transfer_type = USB_TRANSFER_INTERRUPT,
+	.transfer_type = USB_TRANSFER_CONTROL,
 	.direction = USB_DIRECTION_IN,
 	.interface_class = USB_CLASS_VENDOR_SPECIFIC,
 	.interface_subclass = 0x0,
