@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Conti Manuele
+ * Copyright (c) 2020 Manuele Conti
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
