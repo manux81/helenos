@@ -33,9 +33,8 @@
 
 /** SMC95XX device data */
 typedef struct smc95xx_data {
-
-    /** Backward pointer to nic_data */
-    nic_t *nic_data;
+	/** Backward pointer to nic_data */
+	nic_t *nic_data;
 } smc95xx_t;
 
 #endif
