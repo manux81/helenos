@@ -109,7 +109,7 @@ static smc95xx_t *smc95xx_create_dev_data(ddf_dev_t *dev)
 
 static errno_t smc95xx_dev_add(ddf_dev_t *dev);
 
-/** Basic driver operations for RTL8139 driver */
+/** Basic driver operations for SMC95XX driver */
 static driver_ops_t smc95xx_driver_ops = {
 	.dev_add = &smc95xx_dev_add,
 };
