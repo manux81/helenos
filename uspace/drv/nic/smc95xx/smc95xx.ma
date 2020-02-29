@@ -1,0 +1,1 @@
+90 usb&vendor=0x0424&product=0xec00
