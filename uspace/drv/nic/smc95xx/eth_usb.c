@@ -37,6 +37,8 @@
 #include <usb/dev/poll.h>
 #include <usb/debug.h>
 
+#include "eth_usb.h"
+
 /* Endpoint 0: Control */
 static const usb_endpoint_description_t usb_smc95xx_in_ctr_endpoint_description = {
 	.transfer_type = USB_TRANSFER_CONTROL,
@@ -85,5 +87,18 @@ const usb_endpoint_description_t *endpoints[] = {
 	&usb_smc95xx_out_int_endpoint_description,
 	NULL
 };
+
+/** Initialize SMSC95xx USB device.
+ *
+ * @param smc95xx smc96xx device structure.
+ * @param usb_device  Connected USB device.
+ *
+ * @return EOK if succeed, error code otherwise.
+ *
+ */
+errno_t smc95xx_usb_init(smc95xx_usb_t *smc95xx, usb_device_t *usb_device, const usb_endpoint_description_t **endpoints)
+{
+	return EOK;
+}
 
 

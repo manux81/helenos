@@ -29,6 +29,23 @@
 #ifndef SMC95XX_ETH_USB_H_
 #define SMC95XX_ETH_USB_H_
 
+#include <usb/dev/device.h>
+#include <usb/dev/pipes.h>
+
+/** SMC95xx USB device structure */
+typedef struct {
+	/** USB pipes indexes */
+	usb_pipe_t *input_ctrl_pipe;
+	usb_pipe_t *input_blk_pipe;
+	usb_pipe_t *output_blk_pipe;
+	usb_pipe_t *output_intr_pipe;
+
+	/** Pointer to connected USB device. */
+	usb_device_t *usb_device;
+} smc95xx_usb_t;
+
 extern const usb_endpoint_description_t *endpoints[];
+
+extern errno_t smc95xx_usb_init(smc95xx_usb_t *, usb_device_t *, const usb_endpoint_description_t **endpoints);
 
 #endif

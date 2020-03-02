@@ -29,12 +29,28 @@
 #ifndef SMC95XX_DRIVER_H_
 #define SMC95XX_DRIVER_H_
 
+#include <nic.h>
+#include <ddf/driver.h>
+#include <usb/dev/device.h>
+
+#include "eth_usb.h"
+
 #define NAME "SMC95xx"
+
 
 /** SMC95XX device data */
 typedef struct smc95xx_data {
+	/** Lock for access. */
+	fibril_mutex_t lock;
+
 	/** Backward pointer to nic_data */
 	nic_t *nic_data;
+
+	/** Backing DDF device */
+	ddf_dev_t *ddf_dev;
+
+	/** SMC95xx device data */
+	smc95xx_usb_t *smc95xx_usb;
 } smc95xx_t;
 
 #endif

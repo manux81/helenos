@@ -78,6 +78,7 @@ static errno_t smc95xx_get_device_info(ddf_fun_t *dev, nic_device_info_t *info)
 	return EOK;
 }
 
+
 /** Create driver data structure.
  * @param dev The device structure
  *
@@ -99,6 +100,18 @@ static smc95xx_t *smc95xx_create_dev_data(ddf_dev_t *dev)
 	/* SMC95XX structure initialization. */
 	smc95xx_t *smc95xx = calloc(1, sizeof(smc95xx_t));
 	if (!smc95xx) {
+		usb_log_error("Failed to initialize SMC95XX structure: %s\n",
+		    str_error_name(rc));
+		return NULL;
+	}
+
+	smc95xx->ddf_dev = dev;
+
+	fibril_mutex_initialize(&smc95xx->lock);
+
+	rc = smc95xx_usb_init(smc95xx->smc95xx_usb, usb_device_get(dev), endpoints);
+	if (rc != EOK) {
+		free(smc95xx);
 		usb_log_error("Failed to initialize SMC95XX structure: %s\n",
 		    str_error_name(rc));
 		return NULL;
