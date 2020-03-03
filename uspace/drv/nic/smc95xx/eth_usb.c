@@ -38,6 +38,7 @@
 #include <usb/debug.h>
 
 #include "eth_usb.h"
+#include "driver.h"
 
 /* Endpoint 0: Control */
 static const usb_endpoint_description_t usb_smc95xx_in_ctr_endpoint_description = {
@@ -96,9 +97,69 @@ const usb_endpoint_description_t *endpoints[] = {
  * @return EOK if succeed, error code otherwise.
  *
  */
-errno_t smc95xx_usb_init(smc95xx_usb_t *smc95xx, usb_device_t *usb_device, const usb_endpoint_description_t **endpoints)
+errno_t smc95xx_usb_init(smc95xx_t *smc95xx, usb_device_t *usb_device, const usb_endpoint_description_t **endpoints)
 {
-	return EOK;
+	smc95xx_usb_t *smc95xx_usb = NULL;
+	int rc = EOK;
+
+	smc95xx_usb = malloc(sizeof(smc95xx_usb_t));
+	if (!smc95xx_usb) {
+		usb_log_error("Failed to allocate memory for smc95xx usb device "
+		    "structure.\n");
+		rc = ENOMEM;
+		goto exit;
+	}
+
+	for (int p = 0; p < SMC95XX_NUM_ENDPOINTS; p++) {
+		usb_endpoint_mapping_t *epm = usb_device_get_mapped_ep_desc(usb_device, endpoints[p]);
+		if (!epm || !epm->present) {
+			usb_log_error("Failed to map endpoint: %d.", p);
+			rc = ENOENT;
+			free(smc95xx_usb);
+			goto exit;
+		}
+		smc95xx_usb->endpoint_pipe[p] = &epm->pipe;
+	}
+
+	smc95xx_usb->usb_device =  usb_device;
+	smc95xx->smc95xx_usb = smc95xx_usb;
+
+exit:
+	return rc;
 }
+
+/** Send control message.
+ *
+ * @param smc95xx     SMC95XX device structure.
+ * @param buffer      Buffer with data to send.
+ * @param buffer_size Buffer size.
+ *
+ * @return EOK if succeed, error code otherwise.
+ *
+ */
+errno_t smc95xx_usb_send_ctrl_message(smc95xx_t *smc95xx, void *buffer,
+    size_t buffer_size)
+{
+	smc95xx_usb_t *smc95xx_usb = smc95xx->smc95xx_usb;
+	return usb_pipe_write(smc95xx_usb->endpoint_pipe[ctrl_in_ep], buffer, buffer_size);
+}
+
+/** Read control message.
+ *
+ * @param smc95xx          SMC95XX device structure.
+ * @param buffer           Buffer with data to send.
+ * @param buffer_size      Buffer size.
+ * @param transferred_size Real size of read data.
+ *
+ * @return EOK if succeed, error code otherwise.
+ *
+ */
+errno_t smc95xx_usb_read_ctrl_message(smc95xx_t *smc95xx, void *buffer,
+    size_t buffer_size, size_t *transferred_size)
+{
+	smc95xx_usb_t *smc95xx_usb = smc95xx->smc95xx_usb;
+	return usb_pipe_read(smc95xx_usb->endpoint_pipe[ctrl_in_ep], buffer, buffer_size, transferred_size);
+}
+
 
 

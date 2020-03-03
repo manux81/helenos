@@ -109,7 +109,7 @@ static smc95xx_t *smc95xx_create_dev_data(ddf_dev_t *dev)
 
 	fibril_mutex_initialize(&smc95xx->lock);
 
-	rc = smc95xx_usb_init(smc95xx->smc95xx_usb, usb_device_get(dev), endpoints);
+	rc = smc95xx_usb_init(smc95xx, usb_device_get(dev), endpoints);
 	if (rc != EOK) {
 		free(smc95xx);
 		usb_log_error("Failed to initialize SMC95XX structure: %s\n",

@@ -32,13 +32,21 @@
 #include <usb/dev/device.h>
 #include <usb/dev/pipes.h>
 
+#include "driver.h"
+
+#define SMC95XX_NUM_ENDPOINTS 4
+
+enum smc95xx_endpoints {
+	ctrl_in_ep,
+	bulk_in_ep,
+	bulk_out_ep,
+	intr_in_ep
+};
+
 /** SMC95xx USB device structure */
 typedef struct {
 	/** USB pipes indexes */
-	usb_pipe_t *input_ctrl_pipe;
-	usb_pipe_t *input_blk_pipe;
-	usb_pipe_t *output_blk_pipe;
-	usb_pipe_t *output_intr_pipe;
+	usb_pipe_t *endpoint_pipe[SMC95XX_NUM_ENDPOINTS];
 
 	/** Pointer to connected USB device. */
 	usb_device_t *usb_device;
@@ -46,6 +54,8 @@ typedef struct {
 
 extern const usb_endpoint_description_t *endpoints[];
 
-extern errno_t smc95xx_usb_init(smc95xx_usb_t *, usb_device_t *, const usb_endpoint_description_t **endpoints);
+extern errno_t smc95xx_usb_init(smc95xx_t *, usb_device_t *, const usb_endpoint_description_t **endpoints);
+extern errno_t smc95xx_usb_send_ctrl_message(smc95xx_t *, void *, size_t);
+extern errno_t smc95xx_usb_read_ctrl_message(smc95xx_t *, void *, size_t, size_t *);
 
 #endif

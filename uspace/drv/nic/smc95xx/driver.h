@@ -31,9 +31,6 @@
 
 #include <nic.h>
 #include <ddf/driver.h>
-#include <usb/dev/device.h>
-
-#include "eth_usb.h"
 
 #define NAME "SMC95xx"
 
@@ -50,7 +47,7 @@ typedef struct smc95xx_data {
 	ddf_dev_t *ddf_dev;
 
 	/** SMC95xx device data */
-	smc95xx_usb_t *smc95xx_usb;
+	void *smc95xx_usb;
 } smc95xx_t;
 
 #endif
