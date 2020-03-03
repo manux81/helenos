@@ -54,8 +54,8 @@ typedef struct {
 
 extern const usb_endpoint_description_t *endpoints[];
 
-extern errno_t smc95xx_usb_init(smc95xx_t *, usb_device_t *, const usb_endpoint_description_t **endpoints);
-extern errno_t smc95xx_usb_send_ctrl_message(smc95xx_t *, void *, size_t);
-extern errno_t smc95xx_usb_read_ctrl_message(smc95xx_t *, void *, size_t, size_t *);
+extern errno_t smc95xx_usb_init(smc95xx_t *, usb_device_t *, const usb_endpoint_description_t **);
+errno_t smc95xx_usb_write_reg(smc95xx_t *, uint16_t, uint32_t);
+errno_t smc95xx_usb_read_reg(smc95xx_t *, uint16_t, uint32_t *);
 
 #endif

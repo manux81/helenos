@@ -36,6 +36,7 @@
 #include <usb/dev/request.h>
 #include <usb/dev/poll.h>
 #include <usb/debug.h>
+#include <byteorder.h>
 
 #include "eth_usb.h"
 #include "driver.h"
@@ -128,38 +129,75 @@ exit:
 	return rc;
 }
 
-/** Send control message.
+/** Write SMC95XX register.
  *
  * @param smc95xx     SMC95XX device structure.
- * @param buffer      Buffer with data to send.
- * @param buffer_size Buffer size.
+ * @param index       Value of wIndex field of setup packet.
+ * @param data        Data to be sent during DATA stage.
  *
  * @return EOK if succeed, error code otherwise.
  *
  */
-errno_t smc95xx_usb_send_ctrl_message(smc95xx_t *smc95xx, void *buffer,
-    size_t buffer_size)
+errno_t smc95xx_usb_write_reg(smc95xx_t *smc95xx, uint16_t index, uint32_t data)
 {
+	uint32_t tmpbuf = 0U;
+	const usb_device_request_setup_packet_t setup_packet = {
+		.request_type = 0x40,
+		.request = 0xA0,
+		.value = 0x00,
+		.index = index,
+		.length = sizeof(data),
+	};
 	smc95xx_usb_t *smc95xx_usb = smc95xx->smc95xx_usb;
-	return usb_pipe_write(smc95xx_usb->endpoint_pipe[ctrl_in_ep], buffer, buffer_size);
+	tmpbuf = host2int32_t_le(data);
+	return usb_pipe_control_write(smc95xx_usb->endpoint_pipe[ctrl_in_ep],
+	    &setup_packet, sizeof(setup_packet), &tmpbuf, sizeof(tmpbuf));
 }
 
-/** Read control message.
+/** Read SMC95XX register.
  *
- * @param smc95xx          SMC95XX device structure.
- * @param buffer           Buffer with data to send.
- * @param buffer_size      Buffer size.
- * @param transferred_size Real size of read data.
+ * @param smc95xx     SMC95XX device structure.
+ * @param index       Value of wIndex field of setup packet.
+ * @param data        Data to be sent during DATA stage.
  *
  * @return EOK if succeed, error code otherwise.
  *
  */
-errno_t smc95xx_usb_read_ctrl_message(smc95xx_t *smc95xx, void *buffer,
-    size_t buffer_size, size_t *transferred_size)
+errno_t smc95xx_usb_read_reg(smc95xx_t *smc95xx, uint16_t index, uint32_t *data)
 {
-	smc95xx_usb_t *smc95xx_usb = smc95xx->smc95xx_usb;
-	return usb_pipe_read(smc95xx_usb->endpoint_pipe[ctrl_in_ep], buffer, buffer_size, transferred_size);
-}
+	size_t len = 0;
+	uint32_t tmpbuf = 0U;
+	smc95xx_usb_t *smc95xx_usb = NULL;
+	const usb_device_request_setup_packet_t setup_packet = {
+		.request_type = 0xC0,
+		.request = 0xA1,
+		.value = 0x00,
+		.index = index,
+		.length = sizeof(*data),
+	};
 
+	assert(smc95xx);
+	smc95xx_usb = smc95xx->smc95xx_usb;
+	int rc = usb_pipe_control_read(smc95xx_usb->endpoint_pipe[ctrl_in_ep],
+	    &setup_packet, sizeof(setup_packet), &tmpbuf, sizeof(tmpbuf), &len);
+
+	if (rc != EOK) {
+		goto error;
+	}
+
+	if (len != sizeof(*data)) {
+		usb_log_error("smc95xx_read_reg failed: index:=%d, len=%d",
+		    index, len);
+			rc = EIO;
+			goto error;
+	}
+
+	*data = uint32_t_le2host(tmpbuf);
+
+	return EOK;
+
+error:
+	return rc;
+}
 
 
