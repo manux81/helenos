@@ -186,7 +186,7 @@ errno_t smc95xx_usb_read_reg(smc95xx_t *smc95xx, uint16_t index, uint32_t *data)
 	}
 
 	if (len != sizeof(*data)) {
-		usb_log_error("smc95xx_read_reg failed: index:=%d, len=%d",
+		usb_log_error("smc95xx_read_reg failed: index:=%d, len=%zd",
 		    index, len);
 		rc = EIO;
 		goto error;
