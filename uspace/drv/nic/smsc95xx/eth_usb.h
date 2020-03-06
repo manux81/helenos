@@ -26,28 +26,36 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMC95XX_DRIVER_H_
-#define SMC95XX_DRIVER_H_
+#ifndef SMSC95XX_ETH_USB_H_
+#define SMSC95XX_ETH_USB_H_
 
-#include <nic.h>
-#include <ddf/driver.h>
+#include <usb/dev/device.h>
+#include <usb/dev/pipes.h>
 
-#define NAME "SMC95xx"
+#include "driver.h"
 
+#define SMSC95XX_NUM_ENDPOINTS 4
 
-/** SMC95XX device data */
-typedef struct smc95xx_data {
-	/** Lock for access. */
-	fibril_mutex_t lock;
+enum smsc95xx_endpoints {
+	ctrl_in_ep,
+	bulk_in_ep,
+	bulk_out_ep,
+	intr_in_ep
+};
 
-	/** Backward pointer to nic_data */
-	nic_t *nic_data;
+/** SMC95xx USB device structure */
+typedef struct {
+	/** USB pipes indexes */
+	usb_pipe_t *endpoint_pipe[SMSC95XX_NUM_ENDPOINTS];
 
-	/** Backing DDF device */
-	ddf_dev_t *ddf_dev;
+	/** Pointer to connected USB device. */
+	usb_device_t *usb_device;
+} smsc95xx_usb_t;
 
-	/** SMC95xx device data */
-	void *smc95xx_usb;
-} smc95xx_t;
+extern const usb_endpoint_description_t *endpoints[];
+
+extern errno_t smsc95xx_usb_init(smsc95xx_t *, usb_device_t *, const usb_endpoint_description_t **);
+errno_t smsc95xx_usb_write_reg(smsc95xx_t *, uint16_t, uint32_t);
+errno_t smsc95xx_usb_read_reg(smsc95xx_t *, uint16_t, uint32_t *);
 
 #endif

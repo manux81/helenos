@@ -49,20 +49,20 @@
 #include "driver.h"
 #include "eth_usb.h"
 
-static errno_t smc95xx_get_device_info(ddf_fun_t *fun, nic_device_info_t *info);
+static errno_t smsc95xx_get_device_info(ddf_fun_t *fun, nic_device_info_t *info);
 
 /** Network interface options for SMC95XX card driver */
-static nic_iface_t smc95xx_nic_iface = {
-	.get_device_info = &smc95xx_get_device_info,
+static nic_iface_t smsc95xx_nic_iface = {
+	.get_device_info = &smsc95xx_get_device_info,
 };
 
 /** Basic device operations for SMC95XX driver */
-static ddf_dev_ops_t smc95xx_dev_ops;
+static ddf_dev_ops_t smsc95xx_dev_ops;
 
 /** Get device information.
  *
  */
-static errno_t smc95xx_get_device_info(ddf_fun_t *dev, nic_device_info_t *info)
+static errno_t smsc95xx_get_device_info(ddf_fun_t *dev, nic_device_info_t *info)
 {
 	assert(dev);
 	assert(info);
@@ -84,7 +84,7 @@ static errno_t smc95xx_get_device_info(ddf_fun_t *dev, nic_device_info_t *info)
  *
  * @return Initialized device data structure or NULL if error occured
  */
-static smc95xx_t *smc95xx_create_dev_data(ddf_dev_t *dev)
+static smsc95xx_t *smc95xx_create_dev_data(ddf_dev_t *dev)
 {
 	errno_t rc = EOK;
 	const char *err_msg = NULL;
@@ -98,82 +98,82 @@ static smc95xx_t *smc95xx_create_dev_data(ddf_dev_t *dev)
 	}
 
 	/* SMC95XX structure initialization. */
-	smc95xx_t *smc95xx = calloc(1, sizeof(smc95xx_t));
-	if (!smc95xx) {
-		usb_log_error("Failed to initialize SMC95XX structure: %s\n",
+	smsc95xx_t *smsc95xx = calloc(1, sizeof(smsc95xx_t));
+	if (!smsc95xx) {
+		usb_log_error("Failed to initialize SMSC95XX structure: %s\n",
 		    str_error_name(rc));
 		return NULL;
 	}
 
-	smc95xx->ddf_dev = dev;
+	smsc95xx->ddf_dev = dev;
 
-	fibril_mutex_initialize(&smc95xx->lock);
+	fibril_mutex_initialize(&smsc95xx->lock);
 
-	rc = smc95xx_usb_init(smc95xx, usb_device_get(dev), endpoints);
+	rc = smsc95xx_usb_init(smsc95xx, usb_device_get(dev), endpoints);
 	if (rc != EOK) {
-		free(smc95xx);
+		free(smsc95xx);
 		usb_log_error("Failed to initialize SMC95XX structure: %s\n",
 		    str_error_name(rc));
 		return NULL;
 	}
 
-	return smc95xx;
+	return smsc95xx;
 }
 
-static errno_t smc95xx_dev_add(ddf_dev_t *dev);
+static errno_t smsc95xx_dev_add(ddf_dev_t *dev);
 
 /** Basic driver operations for SMC95XX driver */
-static driver_ops_t smc95xx_driver_ops = {
-	.dev_add = &smc95xx_dev_add,
+static driver_ops_t smsc95xx_driver_ops = {
+	.dev_add = &smsc95xx_dev_add,
 };
 
 /** Driver structure for RTL8139 driver */
-static driver_t smc95xx_driver = {
+static driver_t smsc95xx_driver = {
 	.name = NAME,
-	.driver_ops = &smc95xx_driver_ops
+	.driver_ops = &smsc95xx_driver_ops
 };
 
 /** The add_device callback of SMC95XX callback
  *
  * Probe and initialize the newly added device.
  *
- * @param dev  The SMC95XX device.
+ * @param dev  The SMSC95XX device.
  *
  * @return EOK if added successfully, error code otherwise
  */
-errno_t smc95xx_dev_add(ddf_dev_t *dev)
+errno_t smsc95xx_dev_add(ddf_dev_t *dev)
 {
 	assert(dev);
 
-	smc95xx_t *smc95xx = smc95xx_create_dev_data(dev);
-	if (smc95xx == NULL) {
+	smsc95xx_t *smsc95xx = smc95xx_create_dev_data(dev);
+	if (smsc95xx == NULL) {
 		usb_log_error("Unable to allocate device softstate.\n");
 		return ENOMEM;
 	}
 
-	usb_log_info("HelenOS SMC95XX device initialized.\n");
+	usb_log_info("HelenOS SMSC95XX device initialized.\n");
 
 	return EOK;
 }
 
-/** Main function of SMC95XX driver
+/** Main function of SMSC95XX driver
  *
  *  Just initialize the driver structures and
  *  put it into the device drivers interface
  */
 int main(void)
 {
-	printf("%s: HelenOS SMC95XX network adapter driver\n", NAME);
+	printf("%s: HelenOS SMSC95XX network adapter driver\n", NAME);
 
 	errno_t rc = nic_driver_init(NAME);
 	if (rc != EOK)
 		return rc;
 
-	nic_driver_implement(&smc95xx_driver_ops, &smc95xx_dev_ops,
-	    &smc95xx_nic_iface);
+	nic_driver_implement(&smsc95xx_driver_ops, &smsc95xx_dev_ops,
+	    &smsc95xx_nic_iface);
 
 	ddf_log_init(NAME);
 
-	return ddf_driver_main(&smc95xx_driver);
+	return ddf_driver_main(&smsc95xx_driver);
 }
 

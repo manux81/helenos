@@ -75,7 +75,7 @@ drvs = [
 	'nic/rtl8169',
 	'nic/ar9271',
 	'nic/virtio-net',
-	'nic/smc95xx',
+	'nic/smsc95xx',
 	'platform/amdm37x',
 	'platform/arm64virt',
 	'platform/icp',
