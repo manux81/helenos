@@ -85,4 +85,10 @@ elif MACHINE == 'integratorcp'
 		'drv/intctl/icp-ic',
 		'drv/platform/icp',
 	]
+
+elif MACHINE == 'raspberrypi'
+	rd_essential += [
+		'drv/nic/smsc95xx',
+	]
+
 endif
