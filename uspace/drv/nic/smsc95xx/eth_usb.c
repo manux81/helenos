@@ -111,6 +111,8 @@ const usb_endpoint_description_t *endpoints[] = {
 };
 
 errno_t smsc95xx_usb_phy_wait_not_busy(smsc95xx_t *sms95xx);
+errno_t smsc95xx_usb_mdio_read(smsc95xx_t *smsc95xx, int phy_id, int idx);
+
 
 /** Initialize SMSC95xx USB device.
  *
@@ -250,3 +252,53 @@ errno_t smsc95xx_usb_phy_wait_not_busy(smsc95xx_t *smsc95xx)
 	} while (1);
 }
 
+/** Read SMSC95XX MDIO register.
+ *
+ * @param smsc95xx    SMSC95XX device structure.
+ * @param phy_id      Phy id number
+ * @param idx         Register index
+ *
+ * @return EOK if succeed, error code otherwise.
+ *
+ */
+errno_t smsc95xx_usb_mdio_read(smsc95xx_t *smsc95xx, int phy_id, int idx)
+{
+	int rc;
+	uint32_t val, addr;
+
+	fibril_mutex_lock(&smsc95xx->lock);
+
+	/* confirm MII not busy */
+	rc = smsc95xx_usb_phy_wait_not_busy(smsc95xx);
+	if (rc != EOK) {
+		usb_log_error("MII is busy in smsc95xx_mdio_read\n");
+		goto exit;
+	}
+
+	/* set the address, index & direction (read from PHY) */
+	addr = (phy_id << 11) | (idx << 6) | MII_READ | MII_BUSY;
+	rc = smsc95xx_usb_write_reg(smsc95xx, MII_ACCESS, addr);
+	if (rc != EOK) {
+		usb_log_error("Error writing MII_ACCESS\n");
+		goto exit;
+	}
+
+	/* confirm MII not busy */
+	rc = smsc95xx_usb_phy_wait_not_busy(smsc95xx);
+	if (rc != EOK) {
+		usb_log_error("Timed out reading MII reg %02X\n", idx);
+		goto exit;
+	}
+
+	rc = smsc95xx_usb_read_reg(smsc95xx, MII_DATA, &val);
+	if (rc != EOK) {
+		usb_log_error("Error reading MII_DATA\n");
+		goto exit;
+	}
+
+	rc = (uint16_t)(val & 0xFFFF);
+
+exit:
+	fibril_mutex_unlock(&smsc95xx->lock);
+	return rc;
+}
