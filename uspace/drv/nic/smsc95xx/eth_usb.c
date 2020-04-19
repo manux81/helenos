@@ -41,6 +41,26 @@
 #include "eth_usb.h"
 #include "driver.h"
 
+/** MAC Control and Status Register (MCSR) Map*/
+#define MAC_CR      (0x100) /**< MAC Control Register */
+#define ADDRH       (0x104) /**< MAC Address High Register */
+#define ADDRL       (0x108) /**< MAC Address Low Register */
+#define HASHH       (0x10C) /**< Multicast Hash Table High Register */
+#define HASHL       (0x110) /**< Multicast Hash Table Low Register */
+#define MII_ACCESS  (0x114) /**< MII Access Register */
+#define MII_DATA    (0x118) /**< MII Data Register */
+#define FLOW        (0x11C) /**< Flow Control Register */
+#define VLAN1       (0x120) /**< VLAN1 Tag Register */
+#define VLAN2       (0x124) /**< VLAN2 Tag Register */
+#define WUFF        (0x128) /**< Wakeup Frame Filter Register */
+#define WUCSR       (0x12C) /**< Wakeup Control and Status Register */
+#define COE_CR      (0x130) /**< Checksum Offload Engine Control Register */
+
+#define MII_WRITE (0x02)
+#define MII_BUSY  (0x01)
+#define MII_READ  (0x00)
+
+
 /* Endpoint 0: Control */
 static const usb_endpoint_description_t usb_smsc95xx_in_ctr_endpoint_description = {
 	.transfer_type = USB_TRANSFER_CONTROL,
@@ -89,6 +109,8 @@ const usb_endpoint_description_t *endpoints[] = {
 	&usb_smsc95xx_out_int_endpoint_description,
 	NULL
 };
+
+errno_t smsc95xx_usb_phy_wait_not_busy(smsc95xx_t *sms95xx);
 
 /** Initialize SMSC95xx USB device.
  *
@@ -201,4 +223,30 @@ error:
 	return rc;
 }
 
+/** Loop until the read is completed with timeout.
+ *
+ * @param smsc95xx    SMSC95XX device structure.
+ *
+ * @return EOK if succeed, error code otherwise.
+ *
+ */
+errno_t smsc95xx_usb_phy_wait_not_busy(smsc95xx_t *sms95xx)
+{
+	struct timespec start_time;
+	struct timespec current_time;
+	uint32_t val = 0U;
+
+	getuptime(&start_time);
+
+	do {
+		smsc95xx_usb_read_reg(sms95xx, MII_ACCESS, &val);
+		if (! (val & MII_BUSY))
+			return EOK;
+
+		getuptime(&current_time);
+		uint32_t diff = current_time.tv_sec - start_time.tv_sec;
+		if (diff >= 1U)
+			return ETIMEDOUT;
+	} while (1);
+}
 
