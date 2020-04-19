@@ -230,7 +230,7 @@ error:
  * @return EOK if succeed, error code otherwise.
  *
  */
-errno_t smsc95xx_usb_phy_wait_not_busy(smsc95xx_t *sms95xx)
+errno_t smsc95xx_usb_phy_wait_not_busy(smsc95xx_t *smsc95xx)
 {
 	struct timespec start_time;
 	struct timespec current_time;
@@ -239,7 +239,7 @@ errno_t smsc95xx_usb_phy_wait_not_busy(smsc95xx_t *sms95xx)
 	getuptime(&start_time);
 
 	do {
-		smsc95xx_usb_read_reg(sms95xx, MII_ACCESS, &val);
+		smsc95xx_usb_read_reg(smsc95xx, MII_ACCESS, &val);
 		if (! (val & MII_BUSY))
 			return EOK;
 
