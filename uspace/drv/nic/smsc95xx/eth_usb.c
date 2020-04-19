@@ -271,7 +271,7 @@ errno_t smsc95xx_usb_mdio_read(smsc95xx_t *smsc95xx, int phy_id, int idx)
 	/* confirm MII not busy */
 	rc = smsc95xx_usb_phy_wait_not_busy(smsc95xx);
 	if (rc != EOK) {
-		usb_log_error("MII is busy in smsc95xx_mdio_read\n");
+		usb_log_error("MII is busy in smsc95xx_usb_mdio_read\n");
 		goto exit;
 	}
 
