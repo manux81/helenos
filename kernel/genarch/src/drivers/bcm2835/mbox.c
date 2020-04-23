@@ -127,6 +127,28 @@ out:
 	return ret;
 }
 
+bool bcm2835_set_power_device(uint32_t device_id, bool on)
+{
+	MBOX_BUFF_ALLOC(msg, mbox_set_power_buf_t);
+
+	msg->buf_hdr.size   = sizeof(mbox_set_power_buf_t);
+	msg->buf_hdr.code   = MBOX_PROP_CODE_REQ;
+	msg->tag_hdr.tag_id = MBOX_TAG_SET_POWER;
+	msg->tag_hdr.buf_size = sizeof(msg->body);
+	msg->tag_hdr.val_len  = sizeof(msg->body);
+	msg->body.device_id   = device_id;
+	msg->body.state       = on ? MBOX_POWER_DEVICE_ON :
+				MBOX_POWER_DEVICE_OFF;
+	msg->zero = 0;
+
+	mbox_write((bcm2835_mbox_t *)BCM2835_MBOX0_ADDR,
+	    MBOX_CHAN_PROP_A2V, KA2VCA((uint32_t)msg));
+	mbox_read((bcm2835_mbox_t *)BCM2835_MBOX0_ADDR,
+	    MBOX_CHAN_PROP_A2V);
+
+	return msg->buf_hdr.code == MBOX_PROP_CODE_RESP_OK;
+}
+
 /**
  * @}
  */

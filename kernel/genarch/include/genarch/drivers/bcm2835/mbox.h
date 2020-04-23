@@ -72,6 +72,19 @@ enum {
 	MBOX_PROP_CODE_RESP_ERR	= 0x80000001
 };
 
+enum {
+	MBOX_POWER_ID_EMMC	= 0x00000000,
+	MBOX_POWER_ID_UART0	= 0x00000001,
+	MBOX_POWER_ID_UART1	= 0x00000002,
+	MBOX_POWER_ID_USB_HCD	= 0x00000003
+};
+
+#define MBOX_POWER_DEVICE_ON	1
+#define MBOX_POWER_DEVICE_OFF	0
+#define MBOX_POWER_DEVICE_WAIT	(1 << 1)
+#define MBOX_TAG_GET_POWER	0x00020001
+#define MBOX_TAG_SET_POWER	0x00028001
+
 #define MBOX_STATUS_FULL	(1 << 31)
 #define MBOX_STATUS_EMPTY	(1 << 30)
 
@@ -121,6 +134,16 @@ typedef struct {
 } mbox_getmem_buf_t;
 
 typedef struct {
+	mbox_prop_buf_hdr_t	buf_hdr;
+	mbox_tag_hdr_t 		tag_hdr;
+	struct {
+		uint32_t	device_id;
+		uint32_t	state;
+	} body;
+	uint32_t		zero;
+} mbox_set_power_buf_t;
+
+typedef struct {
 	ioport32_t width;
 	ioport32_t height;
 	ioport32_t virt_width;
@@ -135,6 +158,7 @@ typedef struct {
 
 extern bool bcm2835_prop_get_memory(uint32_t *base, uint32_t *size);
 extern bool bcm2835_fb_init(fb_properties_t *prop);
+extern bool bcm2835_set_power_device(uint32_t device_id, bool on);
 
 #endif
 
